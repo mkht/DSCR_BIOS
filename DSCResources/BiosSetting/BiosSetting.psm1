@@ -61,7 +61,7 @@ function Test-TargetResource {
     )
 
     $CurrentBiosSetting = Get-TargetResource -Item $Item -Value $Value -ErrorAction Stop
-    
+
     if ($CurrentBiosSetting.Value -ceq $Value) {
         return $true
     }
@@ -102,7 +102,7 @@ function Set-TargetResource {
             Item  = $Item
             Value = $Value
         }
-        
+
         if ($Credential) {
             $SetParam.Password = $Credential.Password
         }
@@ -136,13 +136,14 @@ function Get-BiosSettings {
 
     Process {
         switch ($WmiBios.Manufacturer) {
-            'Lenovo' { 
+            'Lenovo' {
                 Get-LenovoBiosSettings @PSBoundParameters
             }
 
             'HP' {
                 Get-HPBiosSettings @PSBoundParameters
             }
+
             Default {
                 Write-Error 'not compatible'
             }
@@ -177,7 +178,7 @@ function Set-BiosSettings {
 
     Process {
         switch ($WmiBios.Manufacturer) {
-            'Lenovo' { 
+            'Lenovo' {
                 Set-LenovoBiosSettings @PSBoundParameters
             }
 
@@ -272,7 +273,7 @@ function Set-LenovoBiosSettings {
         [bool]$IsSaved = $false
 
         try {
-            #Set 
+            #Set
             [string[]]$SetParameterArray = @($Item, $Value)
             if ($PasswordParameter) {
                 $SetParameterArray += $PasswordParameter
@@ -295,11 +296,11 @@ function Set-LenovoBiosSettings {
             if ($PasswordParameter) {
                 $SaveParameterArray += $PasswordParameter
             }
-    
+
             [string]$SaveParameterString = $SaveParameterArray -join ','
 
             $SaveResult = $SaveBios.SaveBiosSettings($SaveParameterString)
-    
+
             if ($SaveResult.return -eq 'Success') {
                 $IsSaved = $true
                 Write-Verbose 'Success Save'
@@ -315,7 +316,7 @@ function Set-LenovoBiosSettings {
                 if ($PasswordParameter) {
                     $DiscardParameterArray += $PasswordParameter
                 }
-    
+
                 [string]$DiscardParameterString = $DiscardParameterArray -join ','
                 $null = $DiscardBios.DiscardBiosSettings($DiscardParameterString)
             }
