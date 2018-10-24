@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("BiosSetting")]
+class BiosSetting : OMI_BaseResource
+{
+    [Key] String Item;
+    [Required] String Value;
+    [Write, EmbeddedInstance("MSFT_Credential")] String Credential;
+    [Write] Boolean NoRestart;
+};
