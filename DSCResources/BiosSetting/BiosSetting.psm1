@@ -413,30 +413,14 @@ function Set-HPBiosSettings {
         }
 
         switch ($SetResult.Return) {
-            0 { 
-                $ResultMessage = 'Success'
-            }
-            1 { 
-                $ResultMessage = 'Not Supported'
-            }
-            2 { 
-                $ResultMessage = 'Unspecified Error'
-            }
-            3 {
-                $ResultMessage = 'Timeout'
-            }
-            4 {  
-                $ResultMessage = 'Failed'
-            }
-            5 { 
-                $ResultMessage = 'Invalid Parameter'
-            }
-            6 {  
-                $ResultMessage = 'Access Denied'
-            }
-            Default {
-                $ResultMessage = 'Unexpected Error'
-            }
+            0 { $ResultMessage = 'Success' }
+            1 { $ResultMessage = 'Not Supported' }
+            2 { $ResultMessage = 'Unspecified Error' }
+            3 { $ResultMessage = 'Timeout' }
+            4 { $ResultMessage = 'Failed' }
+            5 { $ResultMessage = 'Invalid Parameter' }
+            6 { $ResultMessage = 'Access Denied' }
+            Default { $ResultMessage = 'Unexpected Error' }
         }
 
         if ($ResultMessage -eq 'Success') {
