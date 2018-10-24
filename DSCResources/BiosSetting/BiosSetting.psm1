@@ -104,7 +104,7 @@ function Set-TargetResource {
         }
         
         if ($Credential) {
-            $SetParam.Credential = $Credential
+            $SetParam.Password = $Credential.Password
         }
 
         Set-BiosSettings @SetParam -ErrorAction Stop
@@ -167,8 +167,8 @@ function Set-BiosSettings {
         $Value,
 
         [Parameter(Mandatory = $false)]
-        [pscredential]
-        $Credential
+        [securestring]
+        $Password
     )
 
     Begin {
@@ -247,13 +247,15 @@ function Set-LenovoBiosSettings {
         $Value,
 
         [Parameter(Mandatory = $false)]
-        [pscredential]
-        $Credential
+        [securestring]
+        $Password
     )
 
     Begin {
-        if ($Credential) {
-            $PasswordParameter = ($Credential.GetNetworkCredential().Password, 'ascii', 'us') -join ','
+        if ($Password) {
+            $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
+            $plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+            $PasswordParameter = ($plainPassword, 'ascii', 'us') -join ','
         }
 
         $SetBios = Get-WmiObject -Class Lenovo_SetBiosSetting -Namespace root\wmi -ErrorAction Continue
@@ -387,14 +389,16 @@ function Set-HPBiosSettings {
         $Value,
 
         [Parameter(Mandatory = $false)]
-        [pscredential]
-        $Credential
+        [securestring]
+        $Password
     )
 
     Begin {
-        if ($Credential) {
+        if ($Password) {
             $PasswordEncoding = '<utf-16/>'
-            $PasswordParameter = $PasswordEncoding + $Credential.GetNetworkCredential().Password
+            $private:bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Password)
+            $plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($private:bstr)
+            $PasswordParameter = $PasswordEncoding + $plainPassword
         }
 
         $BiosInterface = Get-WmiObject -Class HP_BIOSSettingInterface -Namespace root\HP\InstrumentedBIOS -ErrorAction Continue
