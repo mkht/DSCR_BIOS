@@ -19,7 +19,7 @@ function Get-TargetResource {
     try {
         $CurrentBiosSetting = Get-BiosSettings -Item $Item -ErrorAction Stop
         if ($null -eq $CurrentBiosSetting) {
-            Write-Error 'Bios setting item not found.'
+            Write-Error 'Failed to get BIOS setting.'
         }
         else {
             @{
@@ -111,6 +111,7 @@ function Set-TargetResource {
 
         #Require reboot
         if (-not $NoRestart) {
+            Write-Verbose 'It is necessary to restart the machine.'
             $global:DSCMachineStatus = 1
         }
     }

@@ -23,7 +23,7 @@ function Get-BiosSettings {
             }
 
             Default {
-                Write-Error 'not compatible'
+                Write-Error 'This system is not supported.'
             }
         }
     }
@@ -64,7 +64,7 @@ function Set-BiosSettings {
                 Set-HPBiosSettings @PSBoundParameters
             }
             Default {
-                Write-Error 'not compatible'
+                Write-Error 'This system is not supported.'
             }
         }
     }
@@ -97,7 +97,7 @@ function Get-LenovoBiosSettings {
         )
 
         if ($null -eq $BiosObj) {
-            throw 'Bios wmi not found.'
+            throw 'Failed to get BIOS setting.'
         }
     }
 
@@ -142,7 +142,7 @@ function Set-LenovoBiosSettings {
         $DiscardBios = Get-WmiObject -Class Lenovo_DiscardBiosSettings -Namespace root\wmi -ErrorAction Continue
 
         if (($null -eq $SetBios) -or ($null -eq $DiscardBios) -or ($null -eq $SaveBios)) {
-            throw 'Bios wmi not found'
+            throw 'Failed to get BIOS setting.'
         }
     }
 
@@ -163,10 +163,10 @@ function Set-LenovoBiosSettings {
 
             if ($SetResult.return -eq 'Success') {
                 $IsSet = $true
-                Write-Verbose 'Set Success'
+                Write-Verbose 'The BIOS setting is changed successfully.'
             }
             else {
-                throw ('Error Set: {0}' -f $SetResult.return)
+                throw ('Error occurred in changing BIOS: {0}' -f $SetResult.return)
             }
 
             # Save
@@ -181,10 +181,10 @@ function Set-LenovoBiosSettings {
 
             if ($SaveResult.return -eq 'Success') {
                 $IsSaved = $true
-                Write-Verbose 'Success Save'
+                Write-Verbose 'The BIOS setting is saved successfully.'
             }
             else {
-                throw ('Error Save: {0}' -f $SaveResult.return)
+                throw ('Error occurred in saving BIOS: {0}' -f $SaveResult.return)
             }
         }
         catch {
@@ -196,6 +196,7 @@ function Set-LenovoBiosSettings {
                 }
 
                 [string]$DiscardParameterString = $DiscardParameterArray -join ','
+                Write-Verbose 'Discarding BIOS setting.'
                 $null = $DiscardBios.DiscardBiosSettings($DiscardParameterString)
             }
 
@@ -239,7 +240,7 @@ function Get-HPBiosSettings {
         )
 
         if ($null -eq $BiosObj) {
-            throw 'no wmi found'
+            throw 'Failed to get BIOS setting.'
         }
     }
 
@@ -283,7 +284,7 @@ function Set-HPBiosSettings {
         $BiosInterface = Get-WmiObject -Class HP_BIOSSettingInterface -Namespace root\HP\InstrumentedBIOS -ErrorAction Continue
 
         if ($null -eq $BiosInterface) {
-            throw 'Bios wmi not found'
+            throw 'Failed to get BIOS setting.'
         }
     }
 
@@ -307,10 +308,10 @@ function Set-HPBiosSettings {
         }
 
         if ($ResultMessage -eq 'Success') {
-            Write-Verbose 'Set Success'
+            Write-Verbose 'The BIOS setting is saved successfully.'
         }
         else {
-            throw ('Error Set: {0}' -f $ResultMessage)
+            throw ('Error occurred in saving BIOS: {0}' -f $ResultMessage)
         }
     }
 
