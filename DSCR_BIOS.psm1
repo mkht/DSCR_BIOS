@@ -1,4 +1,18 @@
+<#
+.SYNOPSIS
+Get current BIOS settings.
 
+.PARAMETER Item
+The name of setting you want to get.
+If not specified, Get-BiosSettings returns all settings.
+
+.EXAMPLE
+PS> Get-BiosSettings
+
+.EXAMPLE
+PS> Get-BiosSettings -Item
+
+#>
 function Get-BiosSettings {
     [CmdletBinding()]
     param (
@@ -32,6 +46,23 @@ function Get-BiosSettings {
 }
 
 
+<#
+.SYNOPSIS
+Modify BIOS settings.
+
+.PARAMETER Item
+The name of setting you want to set.
+
+.PARAMETER Value
+The value of setting.
+
+.PARAMETER Password
+You should specify the password as SecureString when the bios is configured supervisor password.
+
+.EXAMPLE
+PS> Set-BiosSettings -Item -Value -Password (Read-Host -AsSecureString)
+
+#>
 function Set-BiosSettings {
     [CmdletBinding()]
     param (
