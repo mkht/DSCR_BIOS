@@ -104,6 +104,61 @@ function Set-BiosSettings {
 }
 
 
+<#
+.SYNOPSIS
+Set BIOS supervisor password.
+
+.PARAMETER NewPassword
+The password for set
+
+.PARAMETER OldPassword
+The current password.
+
+.EXAMPLE
+PS> Set-BiosPassword -NewPassword $NewPwdAsSecureString -OldPassword $OldPwdAsSecureString
+
+.NOTES
+On Lenovo computer, a password cannot be set using this method when one does not already exist.
+#>
+function Set-BiosPassword {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [securestring]
+        $NewPassword,
+
+        [Parameter(Mandatory = $false)]
+        [securestring]
+        $OldPassword
+    )
+
+    Begin {
+        $WmiBios = Get-WmiObject -Class Win32_BIOS
+    }
+
+    Process {
+        switch ($WmiBios.Manufacturer) {
+            'Lenovo' {
+                if (-not $OldPassword) {
+                    throw 'You should specify old password on Lenovo system.'
+                }
+                Set-LenovoBiosSettings @PSBoundParameters
+            }
+
+            'HP' {
+                Set-HPBiosSettings @PSBoundParameters
+            }
+
+            Default {
+                Write-Error 'This system is not supported.'
+            }
+        }
+    }
+
+    End {}
+}
+
+
 function Get-LenovoBiosSettings {
     [CmdletBinding()]
     param (
@@ -240,6 +295,53 @@ function Set-LenovoBiosSettings {
 }
 
 
+function Set-LenovoBiosPassword {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [securestring]
+        $NewPassword,
+
+        [Parameter(Mandatory = $true)]
+        [securestring]
+        $OldPassword,
+
+        [Parameter(DontShow = $true)]
+        [ValidateSet('pap', 'pop', 'uhdp1', 'uhdp2', 'uhdp3', 'mhdp1', 'mhdp2', 'mhdp3')]
+        [string]
+        $Type = 'pap'   #Supervisor
+    )
+
+    $PasswordEncoding = 'ascii,us'
+
+    if ($NewPassword) {
+        $private:bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword)
+        $NewPasswordParameter = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($private:bstr)
+    }
+
+    if ($OldPassword) {
+        $private:bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($OldPassword)
+        $OldPasswordParameter = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($private:bstr)
+    }
+
+    $SetBios = Get-WmiObject -Class Lenovo_SetBiosPassword -Namespace root\wmi -ErrorAction Continue
+
+    if ($null -eq $SetBios) {
+        throw 'Failed to get BIOS setting.'
+    }
+
+    $SetParameterString = @($Type, $NewPasswordParameter, $OldPasswordParameter, $PasswordEncoding) -join ','
+    $SetResult = $SetBios.SetBiosPassword($SetParameterString)
+
+    if ($SetResult.return -eq 'Success') {
+        Write-Verbose 'BIOS password is changed successfully.'
+    }
+    else {
+        throw ('Error occurred in changing password: {0}' -f $SetResult.return)
+    }
+}
+
+
 function Get-HPBiosSettings {
     [CmdletBinding()]
     param (
@@ -350,7 +452,42 @@ function Set-HPBiosSettings {
     }
 }
 
+
+function Set-HPBiosPassword {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [securestring]
+        $NewPassword,
+
+        [Parameter(Mandatory = $false)]
+        [securestring]
+        $OldPassword
+    )
+
+    $PasswordEncoding = '<utf-16/>'
+
+    if ($NewPassword) {
+        $private:bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword)
+        $private:plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($private:bstr)
+        $NewPasswordParameter = $PasswordEncoding + $private:plainPassword
+    }
+
+    if ($OldPassword) {
+        $private:bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($OldPassword)
+        $private:plainPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($private:bstr)
+        $OldPasswordParameter = $PasswordEncoding + $private:plainPassword
+    }
+    else {
+        $OldPasswordParameter = $PasswordEncoding
+    }
+
+    Set-HPBiosSettings -Item 'Setup Password' -Value $NewPasswordParameter -Password (ConvertTo-SecureString $OldPasswordParameter -AsPlainText -Force)
+}
+
+
 Export-ModuleMember -Function @(
     'Get-BiosSettings',
-    'Set-BiosSettings'
+    'Set-BiosSettings',
+    'Set-BiosPassword'
 )

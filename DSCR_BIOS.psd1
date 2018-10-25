@@ -9,7 +9,8 @@
     PowerShellVersion    = '4.0'
     FunctionsToExport    = @(
         'Get-BiosSettings',
-        'Set-BiosSettings'
+        'Set-BiosSettings',
+        'Set-BiosPassword'
     )
     CmdletsToExport      = @()
     VariablesToExport    = '*'
