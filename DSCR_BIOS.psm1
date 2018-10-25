@@ -10,7 +10,7 @@ If not specified, Get-BiosSettings returns all settings.
 PS> Get-BiosSettings
 
 .EXAMPLE
-PS> Get-BiosSettings -Item
+PS> Get-BiosSettings -Item 'Bluetooth'
 
 #>
 function Get-BiosSettings {
@@ -60,7 +60,7 @@ The value of setting.
 You should specify the password as SecureString when the bios is configured supervisor password.
 
 .EXAMPLE
-PS> Set-BiosSettings -Item -Value -Password (Read-Host -AsSecureString)
+PS> Set-BiosSettings -Item 'Bluetooth' -Value 'Enabled' -Password (Read-Host -AsSecureString)
 
 #>
 function Set-BiosSettings {
